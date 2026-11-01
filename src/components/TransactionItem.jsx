@@ -28,6 +28,15 @@ function TransactionItem({ transaction }) {
           {transaction.category} <span aria-hidden="true">·</span>{' '}
           {dateFormatter.format(new Date(`${transaction.date}T00:00:00Z`))}
         </p>
+        {transaction.currency && transaction.currency !== 'IDR' && (
+          <p className="transaction-item__original">
+            {new Intl.NumberFormat('id-ID', {
+              style: 'currency',
+              currency: transaction.currency,
+              maximumFractionDigits: 2,
+            }).format(transaction.originalAmount)}
+          </p>
+        )}
       </div>
       <p
         className={`transaction-item__amount ${isIncome ? 'transaction-item__amount--income' : ''}`}

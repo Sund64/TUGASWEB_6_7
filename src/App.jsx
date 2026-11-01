@@ -95,6 +95,7 @@ function App() {
         <TransactionForm onAddTransaction={addTransaction} />
         <TransactionList transactions={transactions} />
       </section>
+
     </main>
   )
 }
