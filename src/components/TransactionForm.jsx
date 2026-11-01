@@ -5,6 +5,9 @@ const currencies = ['IDR', 'USD', 'EUR', 'JPY', 'SGD', 'AUD', 'GBP', 'MYR']
 const amountFormatter = new Intl.NumberFormat('id-ID', {
   maximumFractionDigits: 0,
 })
+const rateFormatter = new Intl.NumberFormat('id-ID', {
+  maximumSignificantDigits: 5,
+})
 
 function getToday() {
   const today = new Date()
@@ -20,7 +23,7 @@ function TransactionForm({ onAddTransaction }) {
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(getToday)
   const [error, setError] = useState('')
-  const [rates, setRates] = useState({ IDR: 1 })
+  const [rates, setRates] = useState([])
   const [rateStatus, setRateStatus] = useState('loading')
   const [rateError, setRateError] = useState('')
   const [retryCount, setRetryCount] = useState(0)
@@ -43,14 +46,11 @@ function TransactionForm({ onAddTransaction }) {
           throw new Error('Data kurs mata uang tidak tersedia.')
         }
 
-        const availableRates = Object.fromEntries(
-          currencies.map((code) => [code, data.rates[code]]),
-        )
-        if (
-          currencies.some(
-            (code) => !Number.isFinite(availableRates[code]) || availableRates[code] <= 0,
-          )
-        ) {
+        const availableRates = currencies.map((code) => ({
+          code,
+          rate: code === 'IDR' ? 1 : data.rates[code],
+        }))
+        if (availableRates.some(({ rate }) => !Number.isFinite(rate) || rate <= 0)) {
           throw new Error('Format data kurs mata uang tidak valid.')
         }
 
@@ -101,7 +101,9 @@ function TransactionForm({ onAddTransaction }) {
     event.preventDefault()
 
     const enteredAmount = Number(amount)
-    const rate = rates[currency]
+    const rate = currency === 'IDR'
+      ? 1
+      : rates.find((item) => item.code === currency)?.rate
     if (
       !title.trim() ||
       !category.trim() ||
@@ -232,13 +234,13 @@ function TransactionForm({ onAddTransaction }) {
           </div>
         </label>
 
-        {isForeignCurrency && rateStatus === 'loading' && (
+        {rateStatus === 'loading' && (
           <p className="form-status" role="status" aria-live="polite">
             Mengambil kurs untuk konversi ke IDR...
           </p>
         )}
 
-        {isForeignCurrency && rateStatus === 'error' && (
+        {rateStatus === 'error' && (
           <div className="form-rate-error" role="alert">
             <p>{rateError}</p>
             <button
@@ -249,6 +251,25 @@ function TransactionForm({ onAddTransaction }) {
               Coba Lagi
             </button>
           </div>
+        )}
+
+        {rateStatus === 'success' && (
+          <section className="form-rates" aria-labelledby="form-rates-title">
+            <div className="form-rates__heading">
+              <h3 id="form-rates-title">Kurs dari API berhasil dimuat</h3>
+              <span>Nilai untuk 1 IDR</span>
+            </div>
+            <ul className="form-rates__list">
+              {rates.map(({ code, rate }) => (
+                <li className="form-rates__item" key={code}>
+                  <span>{code}</span>
+                  <strong>
+                    {rateFormatter.format(rate)} {code}
+                  </strong>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         {error && (
