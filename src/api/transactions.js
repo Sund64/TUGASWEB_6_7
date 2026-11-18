@@ -1,6 +1,3 @@
-const transactionColumns =
-  'id, title, category, type, amount, original_amount, currency, exchange_rate, date, created_at'
-
 function mapTransaction(row) {
   return {
     id: row.id,
@@ -15,13 +12,10 @@ function mapTransaction(row) {
   }
 }
 
-export async function fetchTransactions(client, userId) {
-  const { data, error } = await client
-    .from('transactions')
-    .select(transactionColumns)
-    .eq('user_id', userId)
-    .order('date', { ascending: false })
-    .order('created_at', { ascending: false })
+export async function fetchTransactions(client, sessionToken) {
+  const { data, error } = await client.rpc('app_get_transactions', {
+    p_session_token: sessionToken,
+  })
 
   if (error) {
     throw error
@@ -30,26 +24,26 @@ export async function fetchTransactions(client, userId) {
   return data.map(mapTransaction)
 }
 
-export async function createTransaction(client, userId, transaction) {
-  const { data, error } = await client
-    .from('transactions')
-    .insert({
-      user_id: userId,
-      title: transaction.title,
-      category: transaction.category,
-      type: transaction.type,
-      amount: transaction.amount,
-      original_amount: transaction.originalAmount,
-      currency: transaction.currency,
-      exchange_rate: transaction.exchangeRate,
-      date: transaction.date,
-    })
-    .select(transactionColumns)
-    .single()
+export async function createTransaction(client, sessionToken, transaction) {
+  const { data, error } = await client.rpc('app_create_transaction', {
+    p_session_token: sessionToken,
+    p_title: transaction.title,
+    p_category: transaction.category,
+    p_type: transaction.type,
+    p_amount: transaction.amount,
+    p_original_amount: transaction.originalAmount,
+    p_currency: transaction.currency,
+    p_exchange_rate: transaction.exchangeRate,
+    p_date: transaction.date,
+  })
 
   if (error) {
     throw error
   }
 
-  return mapTransaction(data)
+  const row = Array.isArray(data) ? data[0] : data
+  if (!row) {
+    throw new Error('Transaksi tidak dikembalikan oleh Supabase.')
+  }
+  return mapTransaction(row)
 }

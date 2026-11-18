@@ -20,7 +20,7 @@ function TransactionList({ transactions, status, error, onRetry }) {
       )}
 
       {status === 'error' && (
-        <div className="student-error" role="alert">
+        <div className="transaction-error" role="alert">
           <p>Transaksi gagal dimuat. {error}</p>
           <button className="retry-button" type="button" onClick={onRetry}>
             Coba Lagi

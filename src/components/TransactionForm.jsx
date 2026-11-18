@@ -8,6 +8,7 @@ const amountFormatter = new Intl.NumberFormat('id-ID', {
 const rateFormatter = new Intl.NumberFormat('id-ID', {
   maximumSignificantDigits: 5,
 })
+const futureDateError = 'Tanggal transaksi tidak boleh melebihi hari ini.'
 
 function getToday() {
   const today = new Date()
@@ -28,6 +29,7 @@ function TransactionForm({ onAddTransaction, disabled = false }) {
   const [rateError, setRateError] = useState('')
   const [retryCount, setRetryCount] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const today = getToday()
 
   useEffect(() => {
     const controller = new AbortController()
@@ -101,6 +103,11 @@ function TransactionForm({ onAddTransaction, disabled = false }) {
 
   async function handleSubmit(event) {
     event.preventDefault()
+
+    if (date > today) {
+      setError(futureDateError)
+      return
+    }
 
     const enteredAmount = Number(amount)
     const rate = currency === 'IDR'
@@ -203,7 +210,17 @@ function TransactionForm({ onAddTransaction, disabled = false }) {
             <input
               type="date"
               value={date}
-              onChange={(event) => setDate(event.target.value)}
+              max={today}
+              onChange={(event) => {
+                const nextDate = event.target.value
+                setDate(nextDate)
+                setError(nextDate > today ? futureDateError : '')
+              }}
+              onInvalid={(event) => {
+                if (event.currentTarget.validity.rangeOverflow) {
+                  setError(futureDateError)
+                }
+              }}
               required
             />
           </label>

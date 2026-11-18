@@ -212,52 +212,6 @@
   outline-offset: 3px;
 }
 
-.student-panel {
-  margin-top: 40px;
-}
-
-.student-error {
-  display: grid;
-  justify-items: start;
-  gap: 12px;
-  padding: 14px 0;
-  border-top: 1px solid #e5e7eb;
-}
-
-.student-error p {
-  margin: 0;
-  color: #4b5563;
-  font-size: 12px;
-}
-
-.student-table-wrap {
-  overflow-x: auto;
-  border-top: 1px solid #e5e7eb;
-}
-
-.student-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.student-table th,
-.student-table td {
-  padding: 14px 12px;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 12px;
-}
-
-.student-table th {
-  color: #4b5563;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.student-table td {
-  color: #000;
-}
-
 .panel {
   padding: 20px 0 0;
 }
@@ -385,6 +339,20 @@
 
 .form-status {
   margin: -4px 0 0;
+  color: #4b5563;
+  font-size: 12px;
+}
+
+.transaction-error {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.transaction-error p {
+  margin: 0;
   color: #4b5563;
   font-size: 12px;
 }
