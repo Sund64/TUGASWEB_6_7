@@ -153,6 +153,111 @@
   border-top: 1px solid #e5e7eb;
 }
 
+.account-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.account-bar p {
+  overflow: hidden;
+  margin: 0;
+  color: #4b5563;
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+.account-bar strong {
+  color: #000;
+  font-weight: 500;
+}
+
+.config-message {
+  margin: 0 0 32px;
+  padding: 16px;
+  border: 1px solid #b38b6d;
+  color: #000;
+  background: #f5f1e8;
+  font-size: 13px;
+}
+
+.auth-panel {
+  max-width: 480px;
+  margin: 0 auto 40px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 18px;
+}
+
+.auth-toggle {
+  margin-top: 18px;
+  padding: 0;
+  border: 0;
+  color: #4b5563;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.auth-toggle:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
+}
+
+.student-panel {
+  margin-top: 40px;
+}
+
+.student-error {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.student-error p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 12px;
+}
+
+.student-table-wrap {
+  overflow-x: auto;
+  border-top: 1px solid #e5e7eb;
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.student-table th,
+.student-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 12px;
+}
+
+.student-table th {
+  color: #4b5563;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.student-table td {
+  color: #000;
+}
+
 .panel {
   padding: 20px 0 0;
 }

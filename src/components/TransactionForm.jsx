@@ -15,7 +15,7 @@ function getToday() {
   return localDate.toISOString().slice(0, 10)
 }
 
-function TransactionForm({ onAddTransaction }) {
+function TransactionForm({ onAddTransaction, disabled = false }) {
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
   const [type, setType] = useState('expense')
@@ -27,6 +27,7 @@ function TransactionForm({ onAddTransaction }) {
   const [rateStatus, setRateStatus] = useState('loading')
   const [rateError, setRateError] = useState('')
   const [retryCount, setRetryCount] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -36,6 +37,7 @@ function TransactionForm({ onAddTransaction }) {
       setRateError('')
 
       try {
+        await new Promise((resolve) => setTimeout(resolve, 2500))
         const response = await fetch(API_URL, { signal: controller.signal })
         if (!response.ok) {
           throw new Error(`Server mengembalikan status ${response.status}.`)
@@ -97,7 +99,7 @@ function TransactionForm({ onAddTransaction }) {
     })
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const enteredAmount = Number(amount)
@@ -120,24 +122,32 @@ function TransactionForm({ onAddTransaction }) {
     }
 
     const amountInIdr = Math.round(enteredAmount / rate)
-    onAddTransaction({
-      title: title.trim(),
-      category: category.trim(),
-      type,
-      amount: amountInIdr,
-      originalAmount: enteredAmount,
-      currency,
-      exchangeRate: rate,
-      date,
-    })
-
-    setTitle('')
-    setCategory('')
-    setType('expense')
-    setCurrency('IDR')
-    setAmount('')
-    setDate(getToday())
+    setIsSubmitting(true)
     setError('')
+
+    try {
+      await onAddTransaction({
+        title: title.trim(),
+        category: category.trim(),
+        type,
+        amount: amountInIdr,
+        originalAmount: enteredAmount,
+        currency,
+        exchangeRate: rate,
+        date,
+      })
+
+      setTitle('')
+      setCategory('')
+      setType('expense')
+      setCurrency('IDR')
+      setAmount('')
+      setDate(getToday())
+    } catch (submitError) {
+      setError(`Transaksi gagal disimpan. ${submitError.message || 'Silakan coba lagi.'}`)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isForeignCurrency = currency !== 'IDR'
@@ -281,9 +291,10 @@ function TransactionForm({ onAddTransaction }) {
         <button
           className="submit-button"
           type="submit"
-          disabled={isForeignCurrency && rateStatus !== 'success'}
+          disabled={disabled || isSubmitting || (isForeignCurrency && rateStatus !== 'success')}
         >
-          <span aria-hidden="true">+</span> Tambah transaksi
+          <span aria-hidden="true">+</span>{' '}
+          {isSubmitting ? 'Menyimpan...' : 'Tambah transaksi'}
         </button>
       </form>
     </section>
