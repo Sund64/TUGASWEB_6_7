@@ -11,7 +11,7 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
   timeZone: 'UTC',
 })
 
-function TransactionItem({ transaction }) {
+function TransactionItem({ transaction, onDelete, onEdit }) {
   const isIncome = transaction.type === 'income'
 
   return (
@@ -43,6 +43,27 @@ function TransactionItem({ transaction }) {
       >
         {isIncome ? '+' : '-'} {rupiahFormatter.format(transaction.amount)}
       </p>
+      {onDelete && (
+        <div className="transaction-item__actions">
+          {onEdit && (
+            <button
+              type="button"
+              className="transaction-item__edit"
+              onClick={() => onEdit(transaction)}
+            >
+              Edit
+            </button>
+          )}
+          <button
+            type="button"
+            className="transaction-item__delete"
+            onClick={() => onDelete(transaction.id)}
+            aria-label={`Hapus ${transaction.title}`}
+          >
+            Hapus
+          </button>
+        </div>
+      )}
     </li>
   )
 }

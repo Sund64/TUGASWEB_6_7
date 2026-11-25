@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
-import { createTransaction, fetchTransactions } from './api/transactions.js'
+import {
+  createTransaction,
+  deleteTransaction,
+  fetchTransactions,
+  updateTransaction,
+} from './api/transactions.js'
 import { signOutAppUser } from './api/auth.js'
 import AuthPanel from './components/AuthPanel.jsx'
 import Header from './components/Header.jsx'
 import SummaryCard from './components/SummaryCard.jsx'
 import TransactionForm from './components/TransactionForm.jsx'
 import TransactionList from './components/TransactionList.jsx'
-import supabase from './lib/supabaseClient.js'
 import './App.css'
 
 const sessionStorageKey = 'keuangan-app-session'
@@ -32,13 +36,13 @@ function App() {
   const [isSigningOut, setIsSigningOut] = useState(false)
 
   useEffect(() => {
-    if (!supabase || !session) {
+    if (!session) {
       return undefined
     }
 
     let isActive = true
 
-    fetchTransactions(supabase, session.token)
+    fetchTransactions(null, session.token)
       .then((data) => {
         if (isActive) {
           setTransactionData({
@@ -88,7 +92,7 @@ function App() {
 
   async function addTransaction(transaction) {
     const savedTransaction = await createTransaction(
-      supabase,
+      null,
       session.token,
       transaction,
     )
@@ -96,10 +100,40 @@ function App() {
       if (currentData?.token !== session.token) {
         return currentData
       }
-
       return {
         ...currentData,
         transactions: [savedTransaction, ...currentData.transactions],
+      }
+    })
+  }
+
+  async function removeTransaction(id) {
+    await deleteTransaction(session.token, id)
+    setTransactionData((currentData) => {
+      if (currentData?.token !== session.token) return currentData
+      return {
+        ...currentData,
+        transactions: currentData.transactions.filter((item) => item.id !== id),
+      }
+    })
+  }
+
+  async function editTransaction(transaction) {
+    const title = window.prompt('Nama transaksi', transaction.title)
+    if (title === null) return
+    const category = window.prompt('Kategori', transaction.category)
+    if (category === null) return
+    const saved = await updateTransaction(session.token, transaction.id, {
+      title: title.trim(),
+      category: category.trim(),
+    })
+    setTransactionData((currentData) => {
+      if (currentData?.token !== session.token) return currentData
+      return {
+        ...currentData,
+        transactions: currentData.transactions.map((item) =>
+          item.id === saved.id ? saved : item,
+        ),
       }
     })
   }
@@ -108,7 +142,7 @@ function App() {
     setIsSigningOut(true)
     setAuthError('')
     try {
-      const { error } = await signOutAppUser(supabase, session.token)
+      const { error } = await signOutAppUser(null, session.token)
       if (error) {
         setAuthError(error.message)
       }
@@ -134,18 +168,11 @@ function App() {
     <main className="app-shell">
       <Header />
 
-      {!supabase && (
-        <p className="config-message" role="alert">
-          Konfigurasi Supabase belum tersedia. Isi VITE_SUPABASE_URL dan
-          VITE_SUPABASE_PUBLISHABLE_KEY di file .env, lalu jalankan ulang aplikasi.
-        </p>
+      {!session && (
+        <AuthPanel onLogin={handleLogin} />
       )}
 
-      {supabase && !session && (
-        <AuthPanel client={supabase} onLogin={handleLogin} />
-      )}
-
-      {supabase && session && (
+      {session && (
         <>
           <div className="account-bar">
             <p>Masuk sebagai <strong>{session.username}</strong></p>
@@ -195,6 +222,8 @@ function App() {
               status={transactionStatus}
               error={transactionError}
               onRetry={() => setTransactionRetryCount((count) => count + 1)}
+              onDelete={removeTransaction}
+              onEdit={editTransaction}
             />
           </section>
 

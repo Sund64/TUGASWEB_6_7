@@ -1,6 +1,6 @@
 import TransactionItem from './TransactionItem.jsx'
 
-function TransactionList({ transactions, status, error, onRetry }) {
+function TransactionList({ transactions, status, error, onRetry, onDelete, onEdit }) {
   return (
     <section className="panel list-panel" aria-labelledby="transactions-title">
       <div className="panel-heading">
@@ -15,7 +15,7 @@ function TransactionList({ transactions, status, error, onRetry }) {
 
       {status === 'loading' && (
         <p className="form-status" role="status" aria-live="polite">
-          Mengambil transaksi dari Supabase...
+          Mengambil transaksi dari server Prisma...
         </p>
       )}
 
@@ -33,7 +33,12 @@ function TransactionList({ transactions, status, error, onRetry }) {
       ) : status === 'success' ? (
         <ul className="transaction-list">
           {transactions.map((transaction) => (
-            <TransactionItem key={transaction.id} transaction={transaction} />
+            <TransactionItem
+              key={transaction.id}
+              transaction={transaction}
+              onDelete={onDelete}
+              onEdit={onEdit}
+            />
           ))}
         </ul>
       ) : null}

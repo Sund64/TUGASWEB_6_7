@@ -561,6 +561,31 @@
   color: #000;
 }
 
+.transaction-item__delete {
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 9px;
+  color: #991b1b;
+  background: #fee2e2;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.transaction-item__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.transaction-item__edit {
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 9px;
+  color: #1f2937;
+  background: #e5e7eb;
+  cursor: pointer;
+  font-size: 11px;
+}
+
 .empty-state {
   padding: 36px 12px;
   border-top: 1px solid #e5e7eb;

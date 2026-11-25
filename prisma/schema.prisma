@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  income
+  expense
+}
+
+model AppUser {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username     String        @unique(map: "app_users_username_key")
+  passwordHash String        @map("password_hash")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  sessions     AppSession[]
+  transactions Transaction[]
+
+  @@map("app_users")
+}
+
+model AppSession {
+  tokenHash String   @id @map("token_hash")
+  userId    String   @map("user_id") @db.Uuid
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("app_sessions")
+}
+
+model Transaction {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String          @map("user_id") @db.Uuid
+  title          String
+  category       String
+  type           TransactionType
+  amount         BigInt
+  originalAmount Decimal         @map("original_amount") @db.Decimal(18, 2)
+  currency       String
+  exchangeRate   Decimal         @map("exchange_rate") @db.Decimal(20, 10)
+  date           DateTime        @db.Date
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  user           AppUser         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date, createdAt], map: "transactions_user_date_idx")
+  @@map("transactions")
+}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { loginAppUser, registerAppUser } from '../api/auth.js'
 
-function AuthPanel({ client, onLogin }) {
+function AuthPanel({ onLogin }) {
   const [mode, setMode] = useState('sign-in')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -14,27 +15,10 @@ function AuthPanel({ client, onLogin }) {
     setError('')
 
     try {
-      const { data, error: authError } = await client.rpc(
-        isSigningUp ? 'app_register' : 'app_login',
-        {
-          p_username: username.trim(),
-          p_password: password,
-        },
-      )
-      if (authError) {
-        throw authError
-      }
-
-      const result = Array.isArray(data) ? data[0] : data
-      if (!result?.session_token || !result?.username) {
-        throw new Error(
-          isSigningUp
-            ? 'Pendaftaran gagal. Periksa kembali data akun Anda.'
-            : 'Username atau kata sandi tidak valid.',
-        )
-      }
-
-      onLogin({ token: result.session_token, username: result.username })
+      const result = isSigningUp
+        ? await registerAppUser(username.trim(), password)
+        : await loginAppUser(username.trim(), password)
+      onLogin({ token: result.token, username: result.username })
     } catch (authError) {
       setError(authError.message || 'Autentikasi gagal. Silakan coba lagi.')
     } finally {
